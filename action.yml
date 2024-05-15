@@ -1,0 +1,19 @@
+name: 'SFTP Deploy Action'
+description: 'Deploy files to a server via SFTP.'
+author: 'dacong-wu'
+inputs:
+  SFTP_HOST:
+    description: 'The SFTP host.'
+    required: true
+  SFTP_USERNAME:
+    description: 'The SFTP username.'
+    required: true
+  SFTP_PASSWORD:
+    description: 'The SFTP password.'
+    required: true
+  SFTP_REMOTE:
+    description: 'The remote directory on the SFTP server.'
+    required: true
+runs:
+  using: 'node20'
+  main: 'deploy-to-sftp.js'
