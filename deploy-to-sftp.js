@@ -3,8 +3,9 @@ const fs = require('fs')
 const Client = require('ssh2-sftp-client')
 const dayjs = require('dayjs')
 const logSymbols = require('log-symbols')
+const core = require('@actions/core')
 
-let remote = process.env.SFTP_REMOTE
+let remote = core.getInput('SFTP_REMOTE')
 let localPath = path.join(process.cwd(), 'dist') // 修改路径以适应新环境
 let fileNumber = getPathFileNumber(localPath)
 let steps = 100 / fileNumber
@@ -16,10 +17,10 @@ async function deploy() {
   console.log(logSymbols.info, '正在上传到服务器...')
   sftp
     .connect({
-      host: process.env.SFTP_HOST,
+      host: core.getInput('SFTP_HOST'),
       port: 22,
-      username: process.env.SFTP_USERNAME,
-      password: process.env.SFTP_PASSWORD
+      username: core.getInput('SFTP_USERNAME'),
+      password: core.getInput('SFTP_PASSWORD')
     })
     .then(async () => {
       let fromPath = remote + '/dist'
