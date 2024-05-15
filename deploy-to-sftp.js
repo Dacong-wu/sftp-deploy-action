@@ -2,8 +2,12 @@ const path = require('path')
 const fs = require('fs')
 const Client = require('ssh2-sftp-client')
 const dayjs = require('dayjs')
+const utc = require('dayjs/plugin/utc')
+const timezone = require('dayjs/plugin/timezone')
 const logSymbols = require('log-symbols')
 const core = require('@actions/core')
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 let remote = core.getInput('SFTP_REMOTE')
 let localPath = path.join(process.cwd(), 'dist') // 修改路径以适应新环境
@@ -25,7 +29,7 @@ async function deploy() {
     .then(async () => {
       let fromPath = remote + '/dist'
       let uploadPath = remote + '/upload'
-      let toPath = remote + '/backup/' + dayjs().format('YYYY-MM-DD(HH:mm:ss)')
+      let toPath = remote + '/backup/' + dayjs().tz('Asia/Shanghai').format('YYYY-MM-DD(HH:mm:ss)')
       await sftp.uploadDir(localPath, uploadPath)
       if (!(await sftp.exists(remote + '/backup/'))) sftp.mkdir(remote + '/backup/', true)
       if (await sftp.exists(fromPath)) {
