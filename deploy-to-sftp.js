@@ -29,8 +29,8 @@ async function deploy() {
       if (!(await sftp.exists(remote + '/backup/'))) sftp.mkdir(remote + '/backup/', true)
       if (await sftp.exists(fromPath)) {
         await sftp.rename(fromPath, toPath)
-        await sftp.rename(uploadPath, fromPath)
       }
+      await sftp.rename(uploadPath, fromPath)
     })
     .then(() => {
       console.log(logSymbols.success, '上传成功😁')
