@@ -16,24 +16,31 @@ let steps = 100 / fileNumber
 let percent = 0
 
 const sftp = new Client()
-
+const connectInfo = {
+  host: core.getInput('SFTP_HOST'),
+  port: 22,
+  username: core.getInput('SFTP_USERNAME'),
+  password: core.getInput('SFTP_PASSWORD')
+}
 async function deploy() {
   console.log(logSymbols.info, '正在上传到服务器...')
+  if (core.getInput('SFTP_PRIVATEKEY')) {
+    connectInfo.privateKey = core.getInput('SFTP_PRIVATEKEY')
+  }
   sftp
-    .connect({
-      host: core.getInput('SFTP_HOST'),
-      port: 22,
-      username: core.getInput('SFTP_USERNAME'),
-      password: core.getInput('SFTP_PASSWORD')
-    })
+    .connect(connectInfo)
     .then(async () => {
       let fromPath = remote + '/dist'
       let uploadPath = remote + '/upload'
       let toPath = remote + '/backup/' + dayjs().tz('Asia/Shanghai').format('YYYY-MM-DD(HH:mm:ss)')
       await sftp.uploadDir(localPath, uploadPath)
-      if (!(await sftp.exists(remote + '/backup/'))) sftp.mkdir(remote + '/backup/', true)
       if (await sftp.exists(fromPath)) {
-        await sftp.rename(fromPath, toPath)
+        if (core.getInput('BACKUP')) {
+          if (!(await sftp.exists(remote + '/backup/'))) sftp.mkdir(remote + '/backup/', true)
+          await sftp.rename(fromPath, toPath)
+        } else {
+          await sftp.rmdir(fromPath, true)
+        }
       }
       await sftp.rename(uploadPath, fromPath)
     })

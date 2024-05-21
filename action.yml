@@ -10,10 +10,17 @@ inputs:
     required: true
   SFTP_PASSWORD:
     description: 'The SFTP password.'
-    required: true
+    required: false
+  SFTP_PRIVATEKEY:
+    description: 'The SFTP privateKey'
+    required: false
   SFTP_REMOTE:
     description: 'The remote directory on the SFTP server.'
     required: true
+  BACKUP:
+    description: 'Backup the previous version.'
+    required: false
+    default: true
 runs:
   using: 'node20'
   main: 'deploy-to-sftp.js'
