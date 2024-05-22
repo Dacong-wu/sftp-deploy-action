@@ -35,7 +35,7 @@ async function deploy() {
       let toPath = remote + '/backup/' + dayjs().tz('Asia/Shanghai').format('YYYY-MM-DD(HH:mm:ss)')
       await sftp.uploadDir(localPath, uploadPath)
       if (await sftp.exists(fromPath)) {
-        if (core.getInput('BACKUP')) {
+        if (core.getInput('BACKUP')==='true') {
           if (!(await sftp.exists(remote + '/backup/'))) await sftp.mkdir(remote + '/backup/', true)
           await sftp.rename(fromPath, toPath)
         } else {
