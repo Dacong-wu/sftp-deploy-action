@@ -36,7 +36,7 @@ async function deploy() {
       await sftp.uploadDir(localPath, uploadPath)
       if (await sftp.exists(fromPath)) {
         if (core.getInput('BACKUP')) {
-          if (!(await sftp.exists(remote + '/backup'))) sftp.mkdir(remote + '/backup', true)
+          if (!(await sftp.exists(remote + '/backup/'))) await sftp.mkdir(remote + '/backup/', true)
           await sftp.rename(fromPath, toPath)
         } else {
           await sftp.rmdir(fromPath, true)
