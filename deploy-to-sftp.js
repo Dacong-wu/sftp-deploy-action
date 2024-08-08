@@ -29,6 +29,10 @@ async function deploy() {
   }
   const maxRetries = 3 // 最大重试次数
   let retryCount = 0
+  sftp.on('upload', () => {
+    percent += steps
+    console.log(logSymbols.info, `上传进度：${Math.round(percent)}%`)
+  })
   async function performSFTPTasks() {
     try {
       await sftp.connect(connectInfo)
@@ -66,10 +70,6 @@ async function deploy() {
     }
   }
   await performSFTPTasks()
-  sftp.on('upload', () => {
-    percent += steps
-    console.log(logSymbols.info, `上传进度：${Math.round(percent)}%`)
-  })
 }
 
 function getPathFileNumber(folder) {
