@@ -27,31 +27,45 @@ async function deploy() {
   if (core.getInput('SFTP_PRIVATEKEY')) {
     connectInfo.privateKey = core.getInput('SFTP_PRIVATEKEY')
   }
-  sftp
-    .connect(connectInfo)
-    .then(async () => {
+  const maxRetries = 3 // 最大重试次数
+  let retryCount = 0
+  async function performSFTPTasks() {
+    try {
+      await sftp.connect(connectInfo)
+
       let fromPath = remote + '/dist'
       let uploadPath = remote + '/upload'
       let toPath = remote + '/backup/' + dayjs().tz('Asia/Shanghai').format('YYYY-MM-DD(HH:mm:ss)')
+
       await sftp.uploadDir(localPath, uploadPath)
+
       if (await sftp.exists(fromPath)) {
-        if (core.getInput('BACKUP')==='true') {
+        if (core.getInput('BACKUP') === 'true') {
           if (!(await sftp.exists(remote + '/backup/'))) await sftp.mkdir(remote + '/backup/', true)
           await sftp.rename(fromPath, toPath)
         } else {
           await sftp.rmdir(fromPath, true)
         }
       }
+
       await sftp.rename(uploadPath, fromPath)
-    })
-    .then(() => {
+
       console.log(logSymbols.success, '上传成功😁')
-      return sftp.end()
-    })
-    .catch(err => {
+      await sftp.end()
+    } catch (err) {
       console.log(logSymbols.error, `上传失败😭\n${err}`)
-      return sftp.end()
-    })
+
+      retryCount++
+      if (retryCount <= maxRetries) {
+        console.log(`正在重试... (${retryCount}/${maxRetries})`)
+        await performSFTPTasks() // 递归调用重试
+      } else {
+        console.log('已达到最大重试次数，上传失败')
+        await sftp.end()
+      }
+    }
+  }
+  await performSFTPTasks()
   sftp.on('upload', () => {
     percent += steps
     console.log(logSymbols.info, `上传进度：${Math.round(percent)}%`)
